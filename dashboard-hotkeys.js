@@ -28,6 +28,28 @@ const DASHBOARD_HOTKEY_REMOTE_KEYS = [
   "Enter"
 ];
 
+
+const SANYTRON_ASTRION_KEYS = [
+  { key: "ArrowUp",    label: "Arrow Up" },
+  { key: "ArrowLeft",  label: "Arrow Left" },
+  { key: "ArrowRight", label: "Arrow Right" },
+  { key: "Tab",        label: "Down" },
+  { key: "Enter",      label: "OK" },
+  { key: "PageUp",     label: "Page Up" },
+  { key: "PageDown",   label: "Page Down" },
+  { key: "F1",         label: "Home" },
+  { key: "F2",         label: "Power" },
+  { key: "F3",         label: "Assist" },
+  { key: "F4",         label: "Lights" },
+  { key: "F5",         label: "Covers" },
+  { key: "F6",         label: "Media" },
+  { key: "F7",         label: "Climate" },
+  { key: "F8",         label: "Red" },
+  { key: "F9",         label: "Green" },
+  { key: "F10",        label: "Blue" },
+  { key: "F11",        label: "Yellow" }
+];
+
 const DASHBOARD_HOTKEY_PRESETS = [
   {
     value: "",
@@ -387,12 +409,23 @@ class DashboardHotkeysEditor extends HTMLElement {
       if (!hotkeys[key]) hotkeys[key] = {};
     });
 
+    // Handle preset: "sanytron-astrion" — add all Sanytron keys as custom keys with no actions
+    const customKeys = [...(config?.custom_keys || [])];
+    if (config?.preset === "sanytron-astrion") {
+      SANYTRON_ASTRION_KEYS.forEach(({ key, label }) => {
+        if (!customKeys.some((k) => k.key === key)) {
+          customKeys.push({ key, label });
+        }
+        if (!hotkeys[key]) hotkeys[key] = {};
+      });
+    }
+
     this.config = {
       path: "",
       show_last_key: true,
       ...(config || {}),
       hotkeys,
-      custom_keys: config?.custom_keys || []
+      custom_keys: customKeys
     };
 
     this._serviceList = null; // Reset cached service list
@@ -424,6 +457,27 @@ class DashboardHotkeysEditor extends HTMLElement {
         });
       });
     } catch (_) {}
+  }
+
+  _loadSanytronAstrionPreset() {
+    const customKeys = [...(this.config.custom_keys || [])];
+    const hotkeys = { ...this.config.hotkeys };
+
+    SANYTRON_ASTRION_KEYS.forEach(({ key, label }) => {
+      if (!customKeys.some((k) => k.key === key)) {
+        customKeys.push({ key, label });
+      }
+      if (!hotkeys[key]) hotkeys[key] = {};
+    });
+
+    this.config = {
+      ...this.config,
+      custom_keys: customKeys,
+      hotkeys
+    };
+
+    this._dispatchConfigChanged();
+    this._render();
   }
 
   _dispatchConfigChanged() {
@@ -1520,16 +1574,26 @@ class DashboardHotkeysEditor extends HTMLElement {
 
     toolbar.appendChild(
       this._createButton(
-        "Fill remote defaults",
+        "Sanytron Astrion",
         () => {
-          this._fillRemoteDefaults();
+          this._loadSanytronAstrionPreset();
         },
         "primary"
       )
     );
 
+    toolbar.appendChild(
+      this._createButton(
+        "Fill remote defaults",
+        () => {
+          this._fillRemoteDefaults();
+        },
+        "default"
+      )
+    );
+
     const hint = document.createElement("span");
-    hint.textContent = "Tab is used as Arrow Down. Enter is shown as OK.";
+    hint.textContent = "Use \"Sanytron Astrion\" to add all remote keys. Use \"Fill remote defaults\" to pre-fill actions for all keys.";
     hint.style.cssText = `
       opacity: 0.65;
       font-size: 0.9em;
