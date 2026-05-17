@@ -22,7 +22,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_GITHUB_USER/dashboard-hotkeys-js"
+    "url": "https://github.com/t0m1o1/HA-hotkeys"
   },
   "engines": {
     "homeassistant": ">=2026.3.0"
