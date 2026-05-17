@@ -131,7 +131,7 @@ hotkeys:
 | Field | Description |
 |---|---|
 | `service` | Home Assistant service to call, e.g. `remote.send_command` |
-| `action` | Built-in action: `assist`, `navigate`, `invoke-service` |
+| `action` | Built-in action: `assist`, `navigate`, `call-service` |
 | `data` | Service data / action parameters |
 | `target` | Service target (`entity_id`, `device_id`, or `area_id`) |
 
@@ -154,7 +154,7 @@ hotkeys:
 | `cover.open_cover` / `close_cover` / `stop_cover` | Cover control |
 | `climate.turn_on` / `turn_off` | Climate on/off |
 | `play_media` | Play media on a media player |
-| `custom_service` | Call any service by name (`invoke-service` format) |
+| `custom_service` | Call any service by name (standard `call-service` format) |
 
 ---
 
@@ -164,18 +164,20 @@ The card ships with a **Sanytron Astrion preset** — it registers all physical 
 
 ### What it does
 
-- Adds all 18 Sanytron Astrion keys to the **Custom Keys** list:
+- Adds all 18 Sanytron Astrion keys to the key list:
   - Arrow pad: Arrow Up, Arrow Left, Arrow Right, Down, OK
   - Page Up, Page Down
   - F1 Home, F2 Power, F3 Assist, F4 Lights, F5 Covers, F6 Media, F7 Climate, F8 Red, F9 Green, F10 Blue, F11 Yellow
 - Leaves every hotkey action **empty** — configure them yourself in the editor
 - No services, no navigate, no assist — completely blank slate per key
 
-### Using the preset
+### Using the preset (editor)
 
-In the card editor, click **"Sanytron Astrion"** in the toolbar — all keys appear in the list with no actions set. Then assign actions to each key as needed.
+In the card editor, click **"Sanytron Astrion"** in the toolbar. All keys appear in the list immediately — then assign actions to each one.
 
-Or in YAML:
+### Using the preset (YAML)
+
+Add `preset: sanytron-astrion` to the card config:
 
 ```yaml
 type: custom:dashboard-hotkeys
@@ -183,7 +185,7 @@ preset: sanytron-astrion
 path: /dashboard-tv
 show_last_key: true
 hotkeys:
-  # Configure keys after importing the preset:
+  # Configure specific keys after loading the preset:
   ArrowUp:
     service: remote.send_command
     data:
@@ -194,9 +196,9 @@ hotkeys:
     data: {}
 ```
 
-### Importing the preset manually
+### Path filtering
 
-The raw preset JSON is in `presets/sanytron-astrion.json`. Paste its contents into the editor or use it as a base for a custom preset.
+The **Dashboard path** field limits the card to a specific dashboard URL. If you run HA on multiple devices or dashboards with different hotkey setups, give each card instance a different path value (e.g. `/dashboard-tv`, `/dashboard-kitchen`) — then keypresses on one dashboard won't trigger hotkeys on another. Leave it empty to respond on all dashboards.
 
 ---
 
