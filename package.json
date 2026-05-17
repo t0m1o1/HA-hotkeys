@@ -1,0 +1,30 @@
+{
+  "name": "dashboard-hotkeys-js",
+  "version": "1.0.0",
+  "description": "Home Assistant Lovelace card that catches keyboard presses and fires HA service calls",
+  "main": "dashboard-hotkeys.js",
+  "scripts": {
+    "lint": "eslint dashboard-hotkeys.js",
+    "format": "prettier --write dashboard-hotkeys.js"
+  },
+  "keywords": [
+    "home-assistant",
+    "homeassistant",
+    "lovelace",
+    "lovelace-card",
+    "hotkeys",
+    "keyboard",
+    "remote",
+    "dashboard",
+    "sanytron-astrion"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_GITHUB_USER/dashboard-hotkeys-js"
+  },
+  "engines": {
+    "homeassistant": ">=2026.3.0"
+  }
+}

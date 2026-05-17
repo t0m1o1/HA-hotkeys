@@ -1,0 +1,26 @@
+{
+  "name": "Sanytron Astrion",
+  "description": "Adds all Sanytron Astrion remote keys to the key list with no actions assigned. Use the editor to configure each key after importing.",
+  "version": 1,
+  "custom_keys": [
+    { "key": "ArrowUp",    "label": "Arrow Up" },
+    { "key": "ArrowLeft",  "label": "Arrow Left" },
+    { "key": "ArrowRight", "label": "Arrow Right" },
+    { "key": "Tab",        "label": "Arrow Down" },
+    { "key": "Enter",      "label": "OK" },
+    { "key": "PageUp",     "label": "Page Up" },
+    { "key": "PageDown",   "label": "Page Down" },
+    { "key": "F1",         "label": "F1" },
+    { "key": "F2",         "label": "F2" },
+    { "key": "F3",         "label": "F3" },
+    { "key": "F4",         "label": "F4" },
+    { "key": "F5",         "label": "F5" },
+    { "key": "F6",         "label": "F6" },
+    { "key": "F7",         "label": "F7" },
+    { "key": "F8",         "label": "F8" },
+    { "key": "F9",         "label": "F9" },
+    { "key": "F10",        "label": "F10" },
+    { "key": "F11",        "label": "F11" }
+  ],
+  "hotkeys": {}
+}

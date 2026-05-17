@@ -1,0 +1,8 @@
+{
+  "name": "Dashboard Hotkeys",
+  "filename": "dashboard-hotkeys.js",
+  "content_in_root": true,
+  "render_readme": true,
+  "homeassistant": "2026.3.0",
+  "themeable": true
+}
