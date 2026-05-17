@@ -161,7 +161,7 @@ const DASHBOARD_HOTKEY_PRESETS = [
   {
     value: "custom_service",
     label: "Custom service",
-    service: "invoke-service",
+    action: "call-service",
     domain: null,
     needsCustomService: true
   }
@@ -294,8 +294,8 @@ class DashboardHotkeys extends HTMLElement {
       return;
     }
 
-    // invoke-service — the action format used by HA's action picker
-    if (action.action === "invoke-service") {
+    // call-service — standard HA Lovelace action type
+    if (action.action === "call-service") {
       if (!action.service || !this._hass) return;
       const [domain, svc] = action.service.split(".");
       if (!domain || !svc) return;
@@ -489,7 +489,7 @@ class DashboardHotkeysEditor extends HTMLElement {
   }
 
   _getPresetForAction(action) {
-    if (action?.action === "invoke-service") {
+    if (action?.action === "call-service") {
       // Custom service via HA action picker
       return DASHBOARD_HOTKEY_PRESETS.find((preset) => preset.value === "custom_service");
     }
@@ -590,19 +590,19 @@ class DashboardHotkeysEditor extends HTMLElement {
         target: { entity_id: existing.target?.entity_id || existingEntity || "" }
       };
     } else if (preset.needsCustomService) {
-      // Custom service — use HA's invoke-service action format
-      // Preserve any existing invoke-service fields
-      const isInvokeService = existing.action === "invoke-service";
-      const existingService = isInvokeService ? existing.service : (existing.service || "");
-      const existingTarget = isInvokeService ? existing.target : (existing.target || {});
-      const existingActionData = isInvokeService ? existing.data : existing;
+      // Custom service — use HA's standard call-service action format
+      // Preserve any existing call-service fields
+      const isCallService = existing.action === "call-service";
+      const existingService = isCallService ? existing.service : (existing.service || "");
+      const existingTarget = isCallService ? existing.target : (existing.target || {});
+      const existingActionData = isCallService ? existing.data : existing;
       const { entity_id, media_content_id, media_content_type, media_title, ...rest } = (existingActionData || {});
 
-      // entity_id lives in target for invoke-service; also mirror to data for the entity selector
+      // entity_id lives in target for call-service; also mirror to data for the entity selector
       const entityId = existingTarget?.entity_id || entity_id || "";
 
       nextAction = {
-        action: "invoke-service",
+        action: "call-service",
         service: existingService,
         target: { entity_id: entityId, ...existingTarget },
         data: { entity_id: entityId, ...rest }
@@ -638,12 +638,12 @@ class DashboardHotkeysEditor extends HTMLElement {
     const existingData = existing.data || {};
     const existingTarget = existing.target || {};
 
-    // For invoke-service, entity goes in target.entity_id; also keep data.entity_id in sync for the selector
-    const isInvokeService = existing.action === "invoke-service";
+    // For call-service, entity goes in target.entity_id; also keep data.entity_id in sync for the selector
+    const isCallService = existing.action === "call-service";
 
     this._setHotkeyAction(key, {
       ...existing,
-      ...(isInvokeService ? { target: { ...existingTarget, entity_id: entityId } } : {}),
+      ...(isCallService ? { target: { ...existingTarget, entity_id: entityId } } : {}),
       data: {
         ...existingData,
         entity_id: entityId
@@ -878,8 +878,8 @@ class DashboardHotkeysEditor extends HTMLElement {
 
     const data = action.data || {};
 
-    // invoke-service stores entity_id in target, not data
-    const entityId = action.action === "invoke-service"
+    // call-service stores entity_id in target, not data
+    const entityId = action.action === "call-service"
       ? action.target?.entity_id
       : data.entity_id;
 
@@ -1298,7 +1298,7 @@ class DashboardHotkeysEditor extends HTMLElement {
       serviceInput.addEventListener("change", (e) => {
         const val = e.target.value.trim();
         this._setHotkeyAction(key, {
-          action: "invoke-service",
+          action: "call-service",
           service: val,
           target: action.target || {},
           data: action.data || {}
@@ -1345,7 +1345,7 @@ class DashboardHotkeysEditor extends HTMLElement {
         let extraData = {};
         try { extraData = JSON.parse(e.target.value || "{}"); } catch (_) {}
         this._setHotkeyAction(key, {
-          action: "invoke-service",
+          action: "call-service",
           service: action.service || "",
           target: action.target || {},
           data: { ...(action.data || {}), ...extraData }
