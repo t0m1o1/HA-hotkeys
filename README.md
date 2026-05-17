@@ -4,7 +4,7 @@ A custom Home Assistant Lovelace card that catches keyboard presses on a dashboa
 
 Designed for dashboards displayed on a TV or wall panel with a keyboard or compact remote — press a key and something happens.
 
-**Also ships with a Sanytron Astrion preset** that auto-configures all keys to sensible defaults for that remote.
+**Also ships with a Sanytron Astrion preset** that auto-registers all remote keys so they appear in the editor.
 
 ---
 
