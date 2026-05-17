@@ -34,7 +34,7 @@ Designed for dashboards displayed on a TV or wall panel with a keyboard or compa
 ### Option A — HACS (recommended)
 
 1. Add this repository to HACS:
-   > **HACS → Integrations → ⋯ → Custom repositories → add `https://github.com/YOUR_GITHUB_USER/dashboard-hotkeys-js` as type "Lovelace"**
+   > **HACS → Integrations → ⋯ → Custom repositories → add `https://github.com/t0m1o1/HA-hotkeys` as type "Lovelace"**
 
 2. Restart Home Assistant
 
@@ -164,7 +164,10 @@ The card ships with a **Sanytron Astrion preset** — it registers all physical 
 
 ### What it does
 
-- Adds all 17 Sanytron Astrion keys to the **Custom Keys** list (Arrow pad, PageUp/Down, F1–F11)
+- Adds all 18 Sanytron Astrion keys to the **Custom Keys** list:
+  - Arrow pad: Arrow Up, Arrow Left, Arrow Right, Down, OK
+  - Page Up, Page Down
+  - F1 Home, F2 Power, F3 Assist, F4 Lights, F5 Covers, F6 Media, F7 Climate, F8 Red, F9 Green, F10 Blue, F11 Yellow
 - Leaves every hotkey action **empty** — configure them yourself in the editor
 - No services, no navigate, no assist — completely blank slate per key
 
@@ -374,7 +377,7 @@ The first match wins. This means you can target broad families (`ArrowUp`) or sp
 
 ## Contributing
 
-Issues and pull requests welcome at [github.com/YOUR_GITHUB_USER/dashboard-hotkeys-js](https://github.com/YOUR_GITHUB_USER/dashboard-hotkeys-js).
+Issues and pull requests welcome at [github.com/t0m1o1/HA-hotkeys](https://github.com/t0m1o1/HA-hotkeys).
 
 When reporting a bug, please include:
 - HA version
