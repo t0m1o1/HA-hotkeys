@@ -4,21 +4,20 @@ A custom Home Assistant Lovelace card that catches keyboard presses on a dashboa
 
 Designed for dashboards displayed on a TV or wall panel with a keyboard or compact remote — press a key and something happens.
 
-**Also ships with a Sanytron Astrion preset** that auto-registers all remote keys so they appear in the editor.
+**Ships with a Sanytron Astrion preset** that adds all remote keys with no actions assigned — configure each one yourself.
 
 ---
 
 ## Features
 
 - **Key capturing** — catches `keydown` events globally, skips inputs/textareas/contenteditable
-- **Path filtering** — only active on specific dashboard paths
 - **20+ built-in presets** — navigate, Assist, media, lights, switches, covers, climate, scripts, scenes, and raw remote commands
 - **Custom keys** — add your own keys beyond the built-in set
 - **Entity picker** — uses HA's native `ha-selector` for entity, device, and area targets
 - **Service autocomplete** — queries HA's service registry for `custom_service` actions
 - **Test / Reset / Clear** — per-key action testing and reset in the editor
 - **Debug display** — shows last key pressed with key/code/keyCode and whether it matched
-- **Sanytron Astrion preset** — one-click import of all keys preconfigured for the Sanytron Astrion remote
+- **Sanytron Astrion preset** — one-click add all remote keys, then configure each one individually
 
 ---
 
@@ -83,11 +82,10 @@ Designed for dashboards displayed on a TV or wall panel with a keyboard or compa
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `path` | string | `""` | Only respond to keypresses when the browser URL contains this string. Empty = all paths. |
 | `show_last_key` | boolean | `true` | Show the "last key pressed" debug panel |
 | `hotkeys` | object | `{}` | Map of key names to actions. See below. |
 | `custom_keys` | array | `[]` | List of extra key definitions beyond the built-in set |
-| `preset` | string | `null` | Preset name to auto-apply on load. Currently supports `"sanytron-astrion"` |
+| `preset` | string | `null` | Preset name. Currently supports `"sanytron-astrion"` |
 
 ### Action format
 
@@ -95,7 +93,6 @@ A hotkey action can be a Home Assistant action object:
 
 ```yaml
 type: custom:dashboard-hotkeys
-path: /dashboard-tv
 show_last_key: true
 hotkeys:
   ArrowUp:
@@ -160,20 +157,15 @@ hotkeys:
 
 ## The Sanytron Astrion Preset
 
-The card ships with a **Sanytron Astrion preset** — it registers all physical keys from the Sanytron Astrion remote in the key list with **no actions assigned**. You then configure each key individually in the editor.
+By default the card starts empty — no keys pre-populated. Press **"Sanytron Astrion"** in the editor toolbar to add all 18 remote keys at once with no actions assigned, then configure each one individually.
 
-### What it does
+### What the preset adds
 
-- Adds all 18 Sanytron Astrion keys to the key list:
-  - Arrow pad: Arrow Up, Arrow Left, Arrow Right, Down, OK
-  - Page Up, Page Down
-  - F1 Home, F2 Power, F3 Assist, F4 Lights, F5 Covers, F6 Media, F7 Climate, F8 Red, F9 Green, F10 Blue, F11 Yellow
-- Leaves every hotkey action **empty** — configure them yourself in the editor
-- No services, no navigate, no assist — completely blank slate per key
+Pressing "Sanytron Astrion" adds all 18 remote keys to the **Custom Keys section** at once, with no actions assigned — configure each one individually via the editor or YAML.
 
 ### Using the preset (editor)
 
-In the card editor, click **"Sanytron Astrion"** in the toolbar. All keys appear in the list immediately — then assign actions to each one.
+Click **"Sanytron Astrion"** in the toolbar. All keys appear immediately — then assign actions to each one.
 
 ### Using the preset (YAML)
 
@@ -182,7 +174,6 @@ Add `preset: sanytron-astrion` to the card config:
 ```yaml
 type: custom:dashboard-hotkeys
 preset: sanytron-astrion
-path: /dashboard-tv
 show_last_key: true
 hotkeys:
   # Configure specific keys after loading the preset:
@@ -195,10 +186,6 @@ hotkeys:
     action: assist
     data: {}
 ```
-
-### Path filtering
-
-The **Dashboard path** field limits the card to a specific dashboard URL. If you run HA on multiple devices or dashboards with different hotkey setups, give each card instance a different path value (e.g. `/dashboard-tv`, `/dashboard-kitchen`) — then keypresses on one dashboard won't trigger hotkeys on another. Leave it empty to respond on all dashboards.
 
 ---
 
@@ -320,7 +307,7 @@ This allows it to intercept and remap key events system-wide, which is required 
 
 The card supports keys beyond the built-in set (F1–F11, arrows, PageUp/PageDown, Enter, Tab).
 
-In the editor UI, use the **Custom Keys** section at the top:
+In the editor UI, use the **Custom Keys** section:
 
 1. Enter the key name (e.g. `KeyA`, `Digit0`, `NumpadEnter`)
 2. Enter a display label (e.g. `Numpad Enter`)
@@ -362,7 +349,6 @@ The first match wins. This means you can target broad families (`ArrowUp`) or sp
 ### Keys not responding
 - Check the debug display panel on the card — does it show the key being pressed?
   - If `matched: no`, the key has no action configured
-  - If the debug panel doesn't update at all, the card isn't receiving events — check `path` filtering
 - Keys pressed inside `<input>`, `<textarea>`, `<select>`, or `contenteditable` elements are always ignored
 - If using a remote, make sure it sends standard USB HID key events (many "media centre" remotes do)
 
