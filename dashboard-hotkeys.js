@@ -196,16 +196,9 @@ class DashboardHotkeys extends HTMLElement {
   }
 
   static async getStubConfig() {
-    const hotkeys = {};
-
-    DASHBOARD_HOTKEY_KEYS.forEach(({ key }) => {
-      hotkeys[key] = {};
-    });
-
     return {
-      path: "",
       show_last_key: true,
-      hotkeys,
+      hotkeys: {},
       custom_keys: []
     };
   }
@@ -396,13 +389,8 @@ class DashboardHotkeys extends HTMLElement {
 
 class DashboardHotkeysEditor extends HTMLElement {
   setConfig(config) {
-    const hotkeys = {
-      ...(config?.hotkeys || {})
-    };
-
-    DASHBOARD_HOTKEY_KEYS.forEach(({ key }) => {
-      if (!hotkeys[key]) hotkeys[key] = {};
-    });
+    // Start with saved hotkeys; only auto-populate keys when Astrion preset is active
+    const hotkeys = { ...(config?.hotkeys || {}) };
 
     // Ensure custom key entries also exist in hotkeys
     (config?.custom_keys || []).forEach(({ key }) => {
@@ -421,7 +409,6 @@ class DashboardHotkeysEditor extends HTMLElement {
     }
 
     this.config = {
-      path: "",
       show_last_key: true,
       ...(config || {}),
       hotkeys,
@@ -838,58 +825,6 @@ class DashboardHotkeysEditor extends HTMLElement {
     this._render();
   }
 
-  _fillRemoteDefaults() {
-    const hotkeys = {};
-
-    DASHBOARD_HOTKEY_KEYS.forEach(({ key }) => {
-      if (DASHBOARD_HOTKEY_REMOTE_KEYS.includes(key)) {
-        const def = this._getKeyDefinition(key);
-
-        hotkeys[key] = {
-          service: "remote.send_command",
-          data: {
-            entity_id: "",
-            command: def?.defaultCommand || ""
-          }
-        };
-      } else if (key === "PageUp") {
-        hotkeys[key] = {
-          service: "media_player.volume_up",
-          data: {
-            entity_id: ""
-          }
-        };
-      } else if (key === "PageDown") {
-        hotkeys[key] = {
-          service: "media_player.volume_down",
-          data: {
-            entity_id: ""
-          }
-        };
-      } else if (key === "F3") {
-        hotkeys[key] = {
-          action: "assist",
-          data: {}
-        };
-      } else {
-        hotkeys[key] = {
-          service: "script.turn_on",
-          data: {
-            entity_id: ""
-          }
-        };
-      }
-    });
-
-    this.config = {
-      ...this.config,
-      hotkeys
-    };
-
-    this._dispatchConfigChanged();
-    this._render();
-  }
-
   _testHotkey(key) {
     const action = this.config.hotkeys?.[key];
 
@@ -1274,7 +1209,7 @@ class DashboardHotkeysEditor extends HTMLElement {
       topLine.appendChild(mediaTypeSelect);
       // Target selector (entity / device / area)
       topLine.appendChild(this._createTargetSelector(key, action, preset));
-    } else if (preset.value && !preset.needsPath && !preset.opensAssist) {
+    } else if (preset.value && !preset.needsPath && !preset.opensAssist && !preset.needsCustomService) {
       topLine.appendChild(this._createEntitySelector(key, action, preset));
     } else {
       const empty = document.createElement("div");
@@ -1325,13 +1260,6 @@ class DashboardHotkeysEditor extends HTMLElement {
     } else if (preset.needsCustomService) {
       // Service name input with autocomplete from HA's service registry
       const serviceDatalistId = `services-${key.replace(/[^a-zA-Z0-9]/g, "")}`;
-      const serviceInputWrapper = document.createElement("div");
-      serviceInputWrapper.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        width: 100%;
-      `;
 
       // Service name input
       const serviceInput = document.createElement("input");
@@ -1370,18 +1298,10 @@ class DashboardHotkeysEditor extends HTMLElement {
         });
       }
 
-      serviceInputWrapper.appendChild(serviceInput);
-      serviceInputWrapper.appendChild(datalist);
-
-      // Data extra fields input
-      const dataLabel = document.createElement("div");
-      dataLabel.textContent = "Extra data (JSON, optional):";
-      dataLabel.style.cssText = `font-size: 0.8em; opacity: 0.7;`;
-
+      // Extra data input
       const dataInput = document.createElement("input");
       dataInput.type = "text";
       const existingData = action.data || {};
-      // Strip common fields that are handled separately; show the rest
       const { entity_id, media_content_id, media_content_type, media_title, ...extraRest } = existingData;
       dataInput.value = JSON.stringify(extraRest).replace(/^"|"$/g, "");
       dataInput.placeholder = '{"key": "value"}';
@@ -1406,15 +1326,69 @@ class DashboardHotkeysEditor extends HTMLElement {
         });
       });
 
-      serviceInputWrapper.appendChild(dataLabel);
-      serviceInputWrapper.appendChild(dataInput);
-
-      topLine.style.gridTemplateColumns = "1fr";
+      // Two-column layout: service name | extra data
+      topLine.style.gridTemplateColumns = "1fr 1fr";
       topLine.innerHTML = "";
-      topLine.appendChild(serviceInputWrapper);
-      bottomLine.style.display = "none";
+      topLine.appendChild(serviceInput);
+      topLine.appendChild(datalist);
+      topLine.appendChild(dataInput);
+
+      // bottomLine stays visible — show Test/Clear buttons only (Reset doesn't apply to custom service)
+      bottomLine.style.display = "";
+      bottomLine.innerHTML = "";
+      bottomLine.style.gridTemplateColumns = "minmax(220px, 1fr) auto auto auto";
+
+      const noExtra = document.createElement("div");
+      noExtra.textContent = "Custom service — use Test to try it";
+      noExtra.style.cssText = `
+        opacity: 0.55;
+        font-size: 0.9em;
+      `;
+      bottomLine.appendChild(noExtra);
+
+      bottomLine.appendChild(
+        this._createButton(
+          "Test",
+          () => {
+            this._testHotkey(key);
+          },
+          "primary"
+        )
+      );
+
+      bottomLine.appendChild(
+        this._createButton(
+          "Clear",
+          () => {
+            this._clearHotkey(key);
+          },
+          "danger"
+        )
+      );
+
+      // Remove button for custom keys
+      if (this.config.custom_keys?.some((ck) => ck.key === key)) {
+        bottomLine.appendChild(
+          this._createButton(
+            "Remove",
+            () => {
+              this._removeCustomKey(key);
+            },
+            "danger"
+          )
+        );
+      }
+
+      right.appendChild(bottomLine);
+      row.appendChild(right);
+
+      this._applyResponsiveRowLayout(row, topLine, bottomLine);
+
       return row;
-    } else {
+    }
+
+    // Fallback for non-custom-service presets
+    else {
       const noExtra = document.createElement("div");
       noExtra.textContent = "No command/value needed";
       noExtra.style.cssText = `
@@ -1498,31 +1472,6 @@ class DashboardHotkeysEditor extends HTMLElement {
 
     root.appendChild(title);
 
-    const pathRow = document.createElement("div");
-    pathRow.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      box-sizing: border-box;
-    `;
-
-    const pathLabel = document.createElement("span");
-    pathLabel.textContent = "Dashboard path:";
-    pathLabel.style.cssText = `
-      width: 110px;
-      font-weight: bold;
-      flex-shrink: 0;
-    `;
-
-    const pathInput = this._createTextInput(this.config.path || "", "/dashboard-tv", (value) => {
-      this._updateTopLevel("path", value);
-    });
-
-    pathRow.appendChild(pathLabel);
-    pathRow.appendChild(pathInput);
-    root.appendChild(pathRow);
-
     const debugRow = document.createElement("div");
     debugRow.style.cssText = `
       display: flex;
@@ -1582,18 +1531,8 @@ class DashboardHotkeysEditor extends HTMLElement {
       )
     );
 
-    toolbar.appendChild(
-      this._createButton(
-        "Fill remote defaults",
-        () => {
-          this._fillRemoteDefaults();
-        },
-        "default"
-      )
-    );
-
     const hint = document.createElement("span");
-    hint.textContent = "Use \"Sanytron Astrion\" to add all remote keys. Use \"Fill remote defaults\" to pre-fill actions for all keys.";
+    hint.textContent = "Press \"Sanytron Astrion\" to add all remote keys.";
     hint.style.cssText = `
       opacity: 0.65;
       font-size: 0.9em;
@@ -1698,31 +1637,6 @@ class DashboardHotkeysEditor extends HTMLElement {
     customKeysSection.appendChild(customKeysContainer);
     root.appendChild(customKeysSection);
 
-    const sectionTitle = document.createElement("div");
-    sectionTitle.textContent = "Built-in Keys";
-    sectionTitle.style.cssText = `
-      font-weight: bold;
-      margin-top: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--divider-color);
-    `;
-
-    root.appendChild(sectionTitle);
-
-    const container = document.createElement("div");
-    container.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-      box-sizing: border-box;
-    `;
-
-    DASHBOARD_HOTKEY_KEYS.forEach((keyInfo) => {
-      container.appendChild(this._createKeyRow(keyInfo));
-    });
-
-    root.appendChild(container);
     this.appendChild(root);
 
     this._hasRendered = true;
